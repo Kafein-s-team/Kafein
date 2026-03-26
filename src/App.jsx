@@ -126,6 +126,8 @@ const contactDetails = [
   { title: 'Email', content: 'Hozen2025@outlook.com', href: 'mailto:Hozen2025@outlook.com' },
 ]
 
+const formSubmitEndpoint = 'https://formsubmit.co/ajax/Hozen2025@outlook.com'
+
 const initialFormData = {
   firstName: '',
   lastName: '',
@@ -146,6 +148,7 @@ const MotionForm = motion.form
 function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [formData, setFormData] = useState(initialFormData)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formMessage, setFormMessage] = useState('')
   const heroRef = useRef(null)
 
@@ -169,13 +172,16 @@ function App() {
     }))
   }
 
-  const handleInquirySubmit = (event) => {
+  const handleInquirySubmit = async (event) => {
     event.preventDefault()
 
     if (!formData.pastries && !formData.coffee) {
-      setFormMessage('Choisis au moins cafe, patisseries ou les deux.')
+      setFormMessage('Choisis au moins café, pâtisseries ou les deux.')
       return
     }
+
+    setIsSubmitting(true)
+    setFormMessage('')
 
     const selectedServices = [
       formData.coffee ? 'Café de spécialité' : null,
@@ -184,29 +190,44 @@ function App() {
       .filter(Boolean)
       .join(' + ')
 
-    const body = [
-      'Bonjour Kafein,',
-      '',
-      "Je souhaite recevoir une proposition pour un événement ou une commande entreprise.",
-      '',
-      `Nom: ${formData.firstName} ${formData.lastName}`.trim(),
-      `Email: ${formData.email}`,
-      `Téléphone: ${formData.phone}`,
-      `Entreprise: ${formData.company || 'Non renseignée'}`,
-      `Type d'événement: ${formData.eventType}`,
-      `Date souhaitée: ${formData.date || 'À définir'}`,
-      `Nombre de personnes: ${formData.guestCount || 'À définir'}`,
-      `Intérêt: ${selectedServices}`,
-      `Budget: ${formData.budget || 'À définir'}`,
-      `Notes: ${formData.notes || 'Aucune note supplémentaire'}`,
-    ].join('\n')
+    const payload = new FormData()
+    payload.append('Prénom', formData.firstName)
+    payload.append('Nom', formData.lastName)
+    payload.append('Email', formData.email)
+    payload.append('Téléphone', formData.phone)
+    payload.append('Entreprise', formData.company || 'Non renseignée')
+    payload.append("Type d'événement", formData.eventType)
+    payload.append('Date souhaitée', formData.date || 'À définir')
+    payload.append('Nombre de personnes', formData.guestCount || 'À définir')
+    payload.append('Intérêt', selectedServices)
+    payload.append('Budget', formData.budget || 'À définir')
+    payload.append('Notes', formData.notes || 'Aucune note supplémentaire')
+    payload.append('_subject', 'Nouvelle demande entreprise - Kafein')
+    payload.append('_template', 'table')
+    payload.append('_captcha', 'false')
+    payload.append('_replyto', formData.email)
+    payload.append('_honey', '')
 
-    const mailtoUrl = `mailto:Hozen2025@outlook.com?subject=${encodeURIComponent(
-      `Demande entreprise - ${formData.company || `${formData.firstName} ${formData.lastName}`.trim()}`
-    )}&body=${encodeURIComponent(body)}`
+    try {
+      const response = await fetch(formSubmitEndpoint, {
+        method: 'POST',
+        body: payload,
+        headers: {
+          Accept: 'application/json',
+        },
+      })
 
-    window.location.href = mailtoUrl
-    setFormMessage("Le formulaire a préparé votre demande dans votre client mail.")
+      if (!response.ok) {
+        throw new Error('submit_failed')
+      }
+
+      setFormMessage('Merci, votre demande a bien été envoyée.')
+      setFormData(initialFormData)
+    } catch {
+      setFormMessage("L'envoi a échoué. Réessaie dans un instant.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -756,13 +777,12 @@ function App() {
               />
             </label>
 
-            <button type="submit" className="btn-primary submit-button">
-              Préparer la demande
+            <button type="submit" className="btn-primary submit-button" disabled={isSubmitting}>
+              {isSubmitting ? 'Envoi en cours...' : 'Envoyer la demande'}
             </button>
 
             <p className="form-caption">
-              Le bouton prépare un email avec toutes les informations pour que vous puissiez l&apos;envoyer
-              directement.
+              Une fois validé, le formulaire envoie directement la demande sans ouvrir de messagerie.
             </p>
             <p className="form-message" aria-live="polite">
               {formMessage}
