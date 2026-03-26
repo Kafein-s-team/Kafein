@@ -3,9 +3,13 @@ import { useEffect, useRef, useState } from 'react'
 import logo from '../assets/logo.png'
 import './App.css'
 
-const navigationLinks = [
+const navigationLeftLinks = [
   { label: 'Menu', href: '#menu' },
   { label: 'Entreprises', href: '#entreprises' },
+]
+
+const navigationRightLinks = [
+  { label: 'A propos', href: '#about' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -83,6 +87,42 @@ const customizations = [
   'Sirop : vanille, noisette, caramel, pain d’épice (+0.50€)',
   'Extra shot (+0.50€)',
   'Extra matcha (+1€)',
+]
+
+const heroPanels = [
+  {
+    label: 'Ambiance',
+    title: 'Minimaliste, chaleureuse, fluide',
+    description: 'Un lieu clair, calme et moderne pour prendre un café, travailler ou faire une pause entre deux rendez-vous.',
+  },
+  {
+    label: 'À la carte',
+    title: 'Signatures, matcha, douceurs maison',
+    description: 'Une carte courte mais affirmée, pensée pour revenir souvent sans se lasser.',
+  },
+  {
+    label: 'Pro',
+    title: 'Pause café et commandes entreprises',
+    description: 'Des formats faciles à adapter pour les réunions, accueils et événements d’équipe.',
+  },
+]
+
+const ritualMoments = [
+  {
+    time: 'Matin',
+    title: 'Le premier café se prend vite, mais bien',
+    description: 'Espresso, latte, chai ou signature maison, avec une mise en place pensée pour le rythme du campus.',
+  },
+  {
+    time: 'Midi',
+    title: 'Une pause courte qui coupe vraiment la journée',
+    description: 'Une boisson froide, une pâtisserie, un moment calme et une vraie respiration au milieu du flux.',
+  },
+  {
+    time: 'Entreprise',
+    title: 'Une offre simple à faire évoluer',
+    description: 'Base sucrée aujourd’hui, extension salée demain, sans refaire tout le site ni toute la présentation.',
+  },
 ]
 
 const aboutCards = [
@@ -171,6 +211,52 @@ function App() {
   const opacity = useTransform(scrollYProgress, [0, 0.45], [1, 0])
 
   const toggleMenu = () => setMobileMenuOpen((current) => !current)
+
+  const scrollToSection = (href) => {
+    const target = document.querySelector(href)
+
+    if (!target) {
+      return
+    }
+
+    const startY = window.scrollY
+    const targetY = target.getBoundingClientRect().top + window.scrollY - 92
+    const distance = targetY - startY
+    const duration = 850
+    let startTime = null
+
+    const easeInOutCubic = (value) => {
+      if (value < 0.5) {
+        return 4 * value * value * value
+      }
+
+      return 1 - Math.pow(-2 * value + 2, 3) / 2
+    }
+
+    const step = (timestamp) => {
+      if (!startTime) {
+        startTime = timestamp
+      }
+
+      const elapsed = timestamp - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easedProgress = easeInOutCubic(progress)
+
+      window.scrollTo(0, startY + distance * easedProgress)
+
+      if (progress < 1) {
+        window.requestAnimationFrame(step)
+      }
+    }
+
+    window.requestAnimationFrame(step)
+  }
+
+  const handleNavClick = (event, href) => {
+    event.preventDefault()
+    setMobileMenuOpen(false)
+    scrollToSection(href)
+  }
 
   const handleFormChange = (event) => {
     const { name, value, type, checked } = event.target
@@ -277,14 +363,46 @@ function App() {
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
       >
-        <motion.a
-          className="logo"
-          href="#top"
-          whileHover={{ scale: 1.03 }}
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          <img src={logo} alt="Logo Kafein" className="logo-img" />
-        </motion.a>
+        <div className="nav-shell">
+          <div className="nav-group nav-group-left">
+            {navigationLeftLinks.map((link, index) => (
+              <motion.a
+                key={link.href}
+                href={link.href}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 + index * 0.1 }}
+                onClick={(event) => handleNavClick(event, link.href)}
+              >
+                {link.label}
+              </motion.a>
+            ))}
+          </div>
+
+          <motion.a
+            className="logo"
+            href="#top"
+            whileHover={{ scale: 1.03 }}
+            onClick={(event) => handleNavClick(event, '#top')}
+          >
+            <img src={logo} alt="Logo Kafein" className="logo-img" />
+          </motion.a>
+
+          <div className="nav-group nav-group-right">
+            {navigationRightLinks.map((link, index) => (
+              <motion.a
+                key={link.href}
+                href={link.href}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55 + index * 0.1 }}
+                onClick={(event) => handleNavClick(event, link.href)}
+              >
+                {link.label}
+              </motion.a>
+            ))}
+          </div>
+        </div>
 
         <motion.button
           className="mobile-menu-toggle"
@@ -298,14 +416,14 @@ function App() {
         </motion.button>
 
         <div id="site-navigation" className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-          {navigationLinks.map((link, index) => (
+          {[...navigationLeftLinks, ...navigationRightLinks].map((link, index) => (
             <motion.a
               key={link.href}
               href={link.href}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 + index * 0.1 }}
-              onClick={() => setMobileMenuOpen(false)}
+              transition={{ delay: 0.35 + index * 0.08 }}
+              onClick={(event) => handleNavClick(event, link.href)}
             >
               {link.label}
             </motion.a>
@@ -416,6 +534,28 @@ function App() {
           </motion.div>
 
           <motion.div
+            className="hero-panels"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.65 }}
+          >
+            {heroPanels.map((panel, index) => (
+              <motion.div
+                key={panel.title}
+                className="hero-panel"
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.75 + index * 0.12, duration: 0.6 }}
+                whileHover={{ y: -4 }}
+              >
+                <span className="hero-panel-label">{panel.label}</span>
+                <h3>{panel.title}</h3>
+                <p>{panel.description}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
             className="scroll-indicator"
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
@@ -453,6 +593,41 @@ function App() {
           </motion.div>
         </div>
       </motion.section>
+
+      <section className="ritual-section">
+        <motion.div
+          className="ritual-intro"
+          initial={{ opacity: 0, y: 36 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.8 }}
+        >
+          <span className="eyebrow">Le rythme Kafein</span>
+          <h2>Un lieu pensé pour les passages rapides, les vraies pauses et les besoins pro</h2>
+          <p>
+            Le site raconte maintenant mieux l’expérience: le café du matin, la respiration du midi,
+            puis les formats entreprise qui prolongent Kafein hors du comptoir.
+          </p>
+        </motion.div>
+
+        <div className="ritual-grid">
+          {ritualMoments.map((moment, index) => (
+            <motion.article
+              key={moment.time}
+              className="ritual-card"
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.7, delay: index * 0.12 }}
+              whileHover={{ y: -6 }}
+            >
+              <span className="ritual-time">{moment.time}</span>
+              <h3>{moment.title}</h3>
+              <p>{moment.description}</p>
+            </motion.article>
+          ))}
+        </div>
+      </section>
 
       <section id="menu" className="menu-section">
         <motion.div
