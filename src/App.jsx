@@ -1,16 +1,32 @@
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import banner from '../assets/banner.png'
 import logo from '../assets/logo.png'
 import './App.css'
 
 const navigationLeftLinks = [
+  { label: 'A propos', href: '#about' },
   { label: 'Menu', href: '#menu' },
-  { label: 'Entreprises', href: '#entreprises' },
 ]
 
 const navigationRightLinks = [
-  { label: 'A propos', href: '#about' },
+  { label: 'Entreprises', href: '#entreprises' },
   { label: 'Contact', href: '#contact' },
+]
+
+const googleReviews = [
+  {
+    author: 'Nikita G.',
+    text: 'Les boissons sont incroyables et le cake aux pommes est délicieux. Le lieu est aussi très cosy pour travailler.',
+  },
+  {
+    author: 'Marie',
+    text: 'Super accueil, chouette ambiance et prix abordables. Le Flanders et les cookies ressortent particulièrement.',
+  },
+  {
+    author: 'Alice G.',
+    text: 'Très bons cafés de qualité, chaï réussi et cookies maison délicieux, avec un accueil chaleureux.',
+  },
 ]
 
 const featureItems = [
@@ -404,6 +420,15 @@ function App() {
           </div>
         </div>
 
+        <motion.a
+          className="mobile-nav-logo"
+          href="#top"
+          whileHover={{ scale: 1.03 }}
+          onClick={(event) => handleNavClick(event, '#top')}
+        >
+          <img src={logo} alt="Logo Kafein" className="logo-img" />
+        </motion.a>
+
         <motion.button
           className="mobile-menu-toggle"
           onClick={toggleMenu}
@@ -486,7 +511,7 @@ function App() {
             }}
             className="hero-logo"
           >
-            <img src={logo} alt="Identité visuelle Kafein" />
+            <img src={banner} alt="Signature Kafein" />
           </motion.div>
 
           <motion.div
@@ -629,6 +654,39 @@ function App() {
         </div>
       </section>
 
+      <section id="about" className="about-section">
+        <motion.div
+          className="about-content"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.8 }}
+        >
+          <h2>Un café pensé pour le quotidien</h2>
+          <p>
+            Kafein accueille étudiants, voisins, équipes et visiteurs autour d&apos;un service
+            rapide, d&apos;un café soigné et d&apos;une ambiance claire et chaleureuse.
+          </p>
+
+          <div className="about-grid">
+            {aboutCards.map((item, index) => (
+              <motion.div
+                key={item.title}
+                className="about-item"
+                initial={{ opacity: 0, y: 26 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.18 + index * 0.12 }}
+                whileHover={{ y: -4 }}
+              >
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
       <section id="menu" className="menu-section">
         <motion.div
           className="section-header"
@@ -762,36 +820,55 @@ function App() {
         </div>
       </section>
 
-      <section id="about" className="about-section">
+      <section className="reviews-section">
         <motion.div
-          className="about-content"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '-100px' }}
+          className="section-header"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.8 }}
         >
-          <h2>Un café pensé pour le quotidien</h2>
-          <p>
-            Kafein accueille étudiants, voisins, équipes et visiteurs autour d&apos;un service
-            rapide, d&apos;un café soigné et d&apos;une ambiance claire et chaleureuse.
+          <h2>Avis Google</h2>
+          <p className="section-subtitle">
+            Quelques retours clients visibles sur la fiche Google de Kafein Specialty Coffee.
           </p>
+        </motion.div>
 
-          <div className="about-grid">
-            {aboutCards.map((item, index) => (
-              <motion.div
-                key={item.title}
-                className="about-item"
-                initial={{ opacity: 0, y: 26 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.18 + index * 0.12 }}
-                whileHover={{ y: -4 }}
-              >
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </motion.div>
-            ))}
-          </div>
+        <div className="reviews-grid">
+          {googleReviews.map((review, index) => (
+            <motion.article
+              key={review.author}
+              className="review-card"
+              initial={{ opacity: 0, y: 26 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.7, delay: index * 0.12 }}
+              whileHover={{ y: -5 }}
+            >
+              <div className="review-stars" aria-hidden="true">
+                <span>★★★★★</span>
+              </div>
+              <p className="review-text">“{review.text}”</p>
+              <p className="review-author">{review.author}</p>
+            </motion.article>
+          ))}
+        </div>
+
+        <motion.div
+          className="reviews-cta"
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.15 }}
+        >
+          <a
+            className="btn-secondary"
+            href="https://www.google.com/maps/place/Kafein+Specialty+Coffee/data=!4m7!3m6!1s0x47c3ddf4b59f7f03:0x9f5771578d07a5f7!8m2!3d50.8503085!4d4.4509869!16s%2Fg%2F11xvxvsry1!19sChIJA3-ftfTdw0cR96UHjVdxV58?authuser=0&hl=fr&rclk=1"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Voir la fiche Google
+          </a>
         </motion.div>
       </section>
 
