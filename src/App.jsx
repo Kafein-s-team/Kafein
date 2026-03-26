@@ -1,5 +1,5 @@
-import { motion, useScroll, useTransform } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import logo from '../assets/logo.png'
 import './App.css'
 
@@ -146,11 +146,20 @@ const initialFormData = {
 const MotionForm = motion.form
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [formData, setFormData] = useState(initialFormData)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formMessage, setFormMessage] = useState('')
   const heroRef = useRef(null)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setIsLoading(false)
+    }, 1600)
+
+    return () => window.clearTimeout(timer)
+  }, [])
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -232,6 +241,36 @@ function App() {
 
   return (
     <div className="app">
+      <AnimatePresence>
+        {isLoading ? (
+          <motion.div
+            className="site-loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.45, ease: 'easeOut' } }}
+          >
+            <motion.div
+              className="site-loader-card"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12, transition: { duration: 0.3 } }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+            >
+              <div className="coffee-loader" aria-hidden="true">
+                <span className="coffee-steam steam-1" />
+                <span className="coffee-steam steam-2" />
+                <span className="coffee-steam steam-3" />
+                <div className="coffee-cup">
+                  <div className="coffee-surface" />
+                  <div className="coffee-handle" />
+                </div>
+                <div className="coffee-saucer" />
+              </div>
+              <p>Préparation de votre café...</p>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
       <motion.nav
         className="navbar"
         initial={{ y: -100 }}
