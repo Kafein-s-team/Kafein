@@ -5,13 +5,13 @@ import logo from '../assets/logo.png'
 import './App.css'
 
 const navigationLeftLinks = [
+  { label: 'Accueil', href: '#top' },
   { label: 'A propos', href: '#about' },
-  { label: 'Menu', href: '#menu' },
 ]
 
 const navigationRightLinks = [
-  { label: 'Entreprises', href: '#entreprises' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Menu', href: '#menu' },
+  { label: 'Evenements', href: '#entreprises' },
 ]
 
 const googleReviews = [
